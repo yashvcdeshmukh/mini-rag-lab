@@ -7,7 +7,9 @@ name = "mini-rag"
 version = "0.1.0"
 description = "Grounded expense-policy assistant (Mini RAG Lab)"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "sentence-transformers>=3.0",
+]
 
 [project.optional-dependencies]
 dev = [
@@ -20,7 +22,7 @@ dev = [
 where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "tests"]
 testpaths = ["tests"]
 addopts = ["-m", "not integration"]
 markers = [
@@ -39,3 +41,7 @@ python_version = "3.11"
 strict = true
 mypy_path = "src"
 packages = ["mini_rag"]
+
+[[tool.mypy.overrides]]
+module = ["sentence_transformers"]
+ignore_missing_imports = true
