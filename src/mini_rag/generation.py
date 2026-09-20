@@ -16,8 +16,13 @@ DEFAULT_TIMEOUT_SECONDS = 120.0
 _THINK_RE = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
 
 SYSTEM_PROMPT = """Answer the question using only the policy excerpts below.
-Answer if the excerpts cover the topic even when the wording differs from the policy.
-If the excerpts do not contain the answer, set sufficient to false.
+Answer if the excerpts cover the same topic even when the wording differs.
+Treat close paraphrases as the same topic. Examples: food means meals;
+first-class or business-class means airfare class; limousine means a
+luxury vehicle upgrade; a $20 taxi receipt is a receipts question.
+If the question asks about a fare class not named in the excerpts, use
+the airfare class rules that are present.
+If no excerpt covers the topic, set sufficient to false.
 
 Return JSON only with this shape:
 {"answer": "...", "sufficient": true, "section": "1"}

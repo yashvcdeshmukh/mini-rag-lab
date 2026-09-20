@@ -8,9 +8,9 @@ from mini_rag.models import ChunkRecord, RetrievedChunk
 
 _SEARCH_SQL = """
 SELECT chunk_id, document, version, section, section_title, text,
-       embedding <=> %s AS distance
+       embedding <=> %s::vector AS distance
 FROM chunks
-ORDER BY embedding <=> %s ASC
+ORDER BY embedding <=> %s::vector ASC
 LIMIT %s
 """
 
