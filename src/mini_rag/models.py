@@ -37,6 +37,19 @@ class ChunkRecord:
     embedding: list[float]
 
 
+@dataclass(frozen=True)
+class RetrievedChunk:
+    """A stored chunk plus its cosine distance from the query vector."""
+
+    chunk_id: str
+    document: str
+    version: str
+    section: str
+    section_title: str
+    text: str
+    distance: float
+
+
 def normalize_version(version: str) -> str:
     """Strip a leading v so IDs use v2.0 rather than vv2.0."""
     stripped = version.strip()

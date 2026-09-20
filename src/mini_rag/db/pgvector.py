@@ -4,7 +4,15 @@ from collections.abc import Sequence
 from types import TracebackType
 from typing import Any
 
-from mini_rag.models import ChunkRecord
+from mini_rag.models import ChunkRecord, RetrievedChunk
+
+_SEARCH_SQL = """
+SELECT chunk_id, document, version, section, section_title, text,
+       embedding <=> %s AS distance
+FROM chunks
+ORDER BY embedding <=> %s ASC
+LIMIT %s
+"""
 
 _UPSERT_SQL = """
 INSERT INTO chunks (
@@ -82,6 +90,27 @@ class PgVectorDatabase:
                     _DELETE_STALE_SQL.format(placeholders=placeholders),
                     (document, *chunk_ids),
                 )
+
+    def search(
+        self, query_vector: Sequence[float], k: int = 3
+    ) -> list[RetrievedChunk]:
+        connection = self._require_connection()
+        query = list(query_vector)
+        with connection.cursor() as cursor:
+            cursor.execute(_SEARCH_SQL, (query, query, k))
+            rows = cursor.fetchall()
+        return [
+            RetrievedChunk(
+                chunk_id=row[0],
+                document=row[1],
+                version=row[2],
+                section=row[3],
+                section_title=row[4],
+                text=row[5],
+                distance=float(row[6]),
+            )
+            for row in rows
+        ]
 
     def count(self) -> int:
         connection = self._require_connection()
