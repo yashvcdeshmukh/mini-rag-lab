@@ -8,6 +8,8 @@ version = "0.1.0"
 description = "Grounded expense-policy assistant (Mini RAG Lab)"
 requires-python = ">=3.11"
 dependencies = [
+    "pgvector>=0.3",
+    "psycopg[binary]>=3.2",
     "python-dotenv>=1.0",
     "sentence-transformers>=3.0",
 ]
@@ -44,5 +46,5 @@ mypy_path = "src"
 packages = ["mini_rag"]
 
 [[tool.mypy.overrides]]
-module = ["sentence_transformers"]
+module = ["sentence_transformers", "psycopg", "pgvector", "pgvector.psycopg"]
 ignore_missing_imports = true
