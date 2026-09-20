@@ -4,6 +4,7 @@ import math
 from collections.abc import Sequence
 
 from mini_rag.embeddings import EMBEDDING_DIM, validate_embeddings
+from mini_rag.generation import GenerationResult
 from mini_rag.models import ChunkRecord, RetrievedChunk
 
 
@@ -26,6 +27,24 @@ class FakeEmbedder:
             embeddings.append(vector)
         validate_embeddings(embeddings, expected_dim=self._dimension)
         return embeddings
+
+
+class FakeGenerator:
+    """Scripted generator for offline tests. Does not call Ollama."""
+
+    def __init__(self, result: GenerationResult | None = None) -> None:
+        self.result = result or GenerationResult(
+            answer="Employees may claim up to $65 per day for meals.",
+            sufficient=True,
+            section="1",
+        )
+        self.calls: list[tuple[str, list[RetrievedChunk]]] = []
+
+    def generate(
+        self, question: str, chunks: Sequence[RetrievedChunk]
+    ) -> GenerationResult:
+        self.calls.append((question, list(chunks)))
+        return self.result
 
 
 class InMemoryDatabase:
