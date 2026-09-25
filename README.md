@@ -23,8 +23,8 @@ Default `pytest` stays offline. Integration tests that download MiniLM or call O
 
 ```bash
 docker compose up -d
-psql "$DATABASE_URL" -f migrations/001_create_chunks.sql
-python -m mini_rag.ingest --policy policy.md
+psql "$DATABASE_URL" -f migrations/expense/001_create_chunks.sql
+python -m mini_rag.expense.ingest --policy policy.md
 ```
 
 `psql` is the primary migration path. Compose init scripts only run on an empty data volume; the SQL is idempotent, so re-running `psql` is safe.
@@ -36,7 +36,7 @@ Re-running ingest upserts the same chunk IDs and removes leftover rows for this 
 Ollama must be running with `qwen3:8b`. Default pytest does not need Ollama.
 
 ```bash
-python -m mini_rag.ask --question "How much can I spend on food each day?"
+python -m mini_rag.expense.ask --question "How much can I spend on food each day?"
 ```
 
 The CLI prints assignment JSON on stdout: `answer`, `citation`, and up to three `retrieved_chunks` with numeric distances. Saved live output for the six required questions is in `examples/required-questions.json`.

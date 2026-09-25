@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-import math
 from collections.abc import Sequence
 
-from mini_rag.embeddings import EMBEDDING_DIM, validate_embeddings
-from mini_rag.generation import GenerationResult
-from mini_rag.models import ChunkRecord, RetrievedChunk
+from mini_rag.embedder import EMBEDDING_DIM, validate_embeddings
 
 
 class FakeEmbedder:
-    """Deterministic embedder for offline tests. Does not load MiniLM."""
+    """Deterministic embedder for offline tests. Does not load a model."""
 
     def __init__(self, dimension: int = EMBEDDING_DIM) -> None:
         self._dimension = dimension
@@ -27,113 +24,3 @@ class FakeEmbedder:
             embeddings.append(vector)
         validate_embeddings(embeddings, expected_dim=self._dimension)
         return embeddings
-
-
-class FakeGenerator:
-    """Scripted generator for offline tests. Does not call Ollama."""
-
-    def __init__(
-        self,
-        result: GenerationResult | None = None,
-        results: dict[str, GenerationResult] | None = None,
-    ) -> None:
-        self.results = results or {}
-        self.result = result
-        if self.result is None and not self.results:
-            self.result = GenerationResult(
-                answer="Employees may claim up to $65 per day for meals.",
-                sufficient=True,
-                section="1",
-            )
-        self.calls: list[tuple[str, list[RetrievedChunk]]] = []
-
-    def generate(
-        self, question: str, chunks: Sequence[RetrievedChunk]
-    ) -> GenerationResult:
-        self.calls.append((question, list(chunks)))
-        if question in self.results:
-            return self.results[question]
-        if self.result is not None:
-            return self.result
-        raise KeyError(question)
-
-
-class ScriptedEmbedder:
-    """Maps exact question text to a query vector for offline retrieval tests."""
-
-    def __init__(self, mapping: dict[str, list[float]]) -> None:
-        if not mapping:
-            raise ValueError("ScriptedEmbedder requires at least one vector")
-        self._mapping = mapping
-        self._dimension = len(next(iter(mapping.values())))
-
-    @property
-    def dimension(self) -> int:
-        return self._dimension
-
-    def embed_texts(self, texts: Sequence[str]) -> list[list[float]]:
-        return [list(self._mapping[text]) for text in texts]
-
-
-class InMemoryDatabase:
-    """Dict-backed store that mirrors upsert and stale-row deletion."""
-
-    def __init__(self) -> None:
-        self._rows: dict[str, ChunkRecord] = {}
-
-    def upsert(self, records: Sequence[ChunkRecord]) -> None:
-        if not records:
-            return
-        documents = {record.document for record in records}
-        if len(documents) != 1:
-            raise ValueError("upsert expects records from a single document")
-        document = next(iter(documents))
-        incoming_ids = {record.chunk_id for record in records}
-        for record in records:
-            self._rows[record.chunk_id] = record
-        stale_ids = [
-            chunk_id
-            for chunk_id, stored in self._rows.items()
-            if stored.document == document and chunk_id not in incoming_ids
-        ]
-        for chunk_id in stale_ids:
-            del self._rows[chunk_id]
-
-    def search(
-        self, query_vector: Sequence[float], k: int = 3
-    ) -> list[RetrievedChunk]:
-        ranked = [
-            RetrievedChunk(
-                chunk_id=record.chunk_id,
-                document=record.document,
-                version=record.version,
-                section=record.section,
-                section_title=record.section_title,
-                text=record.text,
-                distance=_cosine_distance(query_vector, record.embedding),
-            )
-            for record in self._rows.values()
-        ]
-        ranked.sort(key=lambda chunk: chunk.distance)
-        return ranked[:k]
-
-    def count(self) -> int:
-        return len(self._rows)
-
-    def get(self, chunk_id: str) -> ChunkRecord:
-        return self._rows[chunk_id]
-
-
-def _cosine_distance(
-    left: Sequence[float], right: Sequence[float]
-) -> float:
-    if len(left) != len(right):
-        raise ValueError(
-            f"Vector length mismatch: query={len(left)} stored={len(right)}"
-        )
-    dot = sum(a * b for a, b in zip(left, right, strict=True))
-    left_norm = math.sqrt(sum(value * value for value in left))
-    right_norm = math.sqrt(sum(value * value for value in right))
-    if left_norm == 0.0 or right_norm == 0.0:
-        raise ValueError("cosine distance is undefined for a zero vector")
-    return 1.0 - (dot / (left_norm * right_norm))
