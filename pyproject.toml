@@ -8,8 +8,10 @@ version = "0.1.0"
 description = "Grounded expense-policy assistant (Mini RAG Lab)"
 requires-python = ">=3.11"
 dependencies = [
+    "pdfplumber>=0.11",
     "pgvector>=0.3",
     "psycopg[binary]>=3.2",
+    "python-docx>=1.1",
     "python-dotenv>=1.0",
     "sentence-transformers>=3.0",
 ]
@@ -27,7 +29,7 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src", "tests"]
 testpaths = ["tests"]
-addopts = ["-m", "not integration"]
+addopts = ["--import-mode=importlib", "-m", "not integration"]
 markers = [
     "integration: tests that need network, models, or Postgres",
 ]
@@ -40,11 +42,22 @@ target-version = "py311"
 select = ["E", "F", "I", "UP"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 strict = true
 mypy_path = "src"
 packages = ["mini_rag"]
 
 [[tool.mypy.overrides]]
-module = ["sentence_transformers", "psycopg", "pgvector", "pgvector.psycopg"]
+module = [
+    "numpy",
+    "numpy.*",
+    "sentence_transformers",
+    "transformers",
+    "pdfplumber",
+    "docx",
+    "psycopg",
+    "pgvector",
+    "pgvector.psycopg",
+]
 ignore_missing_imports = true
+follow_imports = "skip"

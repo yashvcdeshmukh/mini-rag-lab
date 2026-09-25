@@ -1,0 +1,84 @@
+{
+  "cases": [
+    {
+      "question": "How many tokens does an employee receive?",
+      "recall": null,
+      "precision": null,
+      "mrr": null,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    },
+    {
+      "question": "What should I do with cake left in the weekend fridge?",
+      "recall": 1.0,
+      "precision": 0.16666666666666666,
+      "mrr": 1.0,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    },
+    {
+      "question": "What has to be in a work email?",
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "mrr": 1.0,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    },
+    {
+      "question": "What am I allowed to wear at the office?",
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 0.5,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    },
+    {
+      "question": "Where should employees take cover during a nuclear detonation?",
+      "recall": 1.0,
+      "precision": 0.6666666666666666,
+      "mrr": 1.0,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    },
+    {
+      "question": "Where should employees go during a zombie apocalypse?",
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 0.5,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    },
+    {
+      "question": "What should employees do first if an AI apocalypse starts?",
+      "recall": 1.0,
+      "precision": 0.3333333333333333,
+      "mrr": 1.0,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    },
+    {
+      "question": "What is the dress code for visiting the moon?",
+      "recall": null,
+      "precision": null,
+      "mrr": null,
+      "accuracy": 1.0,
+      "passed": true,
+      "failed": []
+    }
+  ],
+  "averages": {
+    "recall": 1.0,
+    "precision": 0.4166666666666667,
+    "mrr": 0.8333333333333334,
+    "accuracy": 1.0
+  },
+  "passed": 8,
+  "failed": 0
+}
