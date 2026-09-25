@@ -125,7 +125,12 @@ def _decision(
 def _read_jev(request: urllib.request.Request, timeout: float) -> str:
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            return response.read().decode()
+            raw = response.read()
+        if isinstance(raw, str):
+            return raw
+        if isinstance(raw, (bytes, bytearray)):
+            return raw.decode()
+        raise ValueError("Jev response body must be text")
     except TimeoutError as exc:
         raise TimeoutError("Jev request timed out") from exc
 
